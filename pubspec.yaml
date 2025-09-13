@@ -1,7 +1,7 @@
 name: quick_menu
 description: "Long press to display menu in flutter app"
 repository: https://github.com/doersoul/quick_menu
-version: 0.0.2
+version: 0.0.3
 
 environment:
   sdk: ^3.9.2
