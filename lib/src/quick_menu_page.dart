@@ -1,8 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:quick_menu/src/quick_menu_controller.dart';
 
 class QuickMenuPage extends StatefulWidget {
+  final QuickMenuController? controller;
   final Color barrierColor;
   final double? childRadius;
   final Color? childShadowColor;
@@ -15,6 +17,7 @@ class QuickMenuPage extends StatefulWidget {
 
   const QuickMenuPage({
     super.key,
+    this.controller,
     required this.barrierColor,
     this.childRadius,
     this.childShadowColor,
@@ -50,6 +53,8 @@ class _QuickMenuPageState extends State<QuickMenuPage>
 
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
+    _initControllerListener();
+
     _controller.forward();
   }
 
@@ -65,10 +70,38 @@ class _QuickMenuPageState extends State<QuickMenuPage>
   }
 
   @override
+  void didUpdateWidget(QuickMenuPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.controller != oldWidget.controller) {
+      _disposeControllerListener(oldWidget);
+
+      _initControllerListener();
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
 
+    _disposeControllerListener(widget);
+
     super.dispose();
+  }
+
+  void _initControllerListener() {
+    widget.controller?.addListener(_controllerListener);
+  }
+
+  void _disposeControllerListener(QuickMenuPage quickMenuPage) {
+    quickMenuPage.controller?.removeListener(_controllerListener);
+  }
+
+  void _controllerListener() {
+    final bool open = widget.controller!.isOpen;
+    if (!open) {
+      _close();
+    }
   }
 
   Size? _getMenuSize() {
@@ -114,7 +147,7 @@ class _QuickMenuPageState extends State<QuickMenuPage>
     final double incrementHeight =
         (widget.childScaleIncrement * widget.childRect.height) / 2;
 
-    final double space = increment.abs() + incrementHeight;
+    final double space = (increment.abs() + incrementHeight).abs();
 
     final double childBottom = widget.childRect.top + widget.childRect.height;
 
@@ -126,12 +159,11 @@ class _QuickMenuPageState extends State<QuickMenuPage>
             onTap: _onPop,
             child: AnimatedBuilder(
               animation: _animation,
-              builder: (BuildContext ctx, Widget? cld) {
+              builder: (_, _) {
+                final double sigma = 10 * _animation.value;
+
                 return BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 4 * _animation.value,
-                    sigmaY: 4 * _animation.value,
-                  ),
+                  filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
                   child: Container(
                     color: widget.barrierColor.withAlpha(
                       (16 * _animation.value).toInt(),
@@ -140,6 +172,72 @@ class _QuickMenuPageState extends State<QuickMenuPage>
                 );
               },
             ),
+          ),
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (_, _) {
+              final double animateIncrement = -increment * _animation.value;
+              final double animateSpace = space.abs() * _animation.value;
+              final Size? menuSize = _getMenuSize();
+
+              Alignment alignment = Alignment.topLeft;
+              double? left;
+              double? right;
+              double top;
+
+              if (menuSize == null) {
+                left = animateIncrement;
+                top = childBottom + animateIncrement;
+              } else {
+                final double menuWidth = menuSize.width;
+                final double menuHeight = menuSize.height;
+
+                final bool overWidth =
+                    -increment + widget.childRect.left + menuWidth >
+                    _screenWidth;
+
+                final bool overHeight =
+                    space + childBottom + menuHeight > _screenHeight;
+
+                if (overWidth) {
+                  right =
+                      _screenWidth - widget.childRect.right + animateIncrement;
+
+                  if (overHeight) {
+                    top = widget.childRect.top - menuSize.height - animateSpace;
+
+                    alignment = Alignment.bottomRight;
+                  } else {
+                    top = childBottom + animateSpace;
+
+                    alignment = Alignment.topRight;
+                  }
+                } else {
+                  left = widget.childRect.left + animateIncrement;
+
+                  if (overHeight) {
+                    top = widget.childRect.top - menuSize.height - animateSpace;
+
+                    alignment = Alignment.bottomLeft;
+                  } else {
+                    top = childBottom + animateSpace;
+
+                    alignment = Alignment.topLeft;
+                  }
+                }
+              }
+
+              return Positioned(
+                left: left,
+                right: right,
+                top: top,
+                child: ScaleTransition(
+                  alignment: alignment,
+                  scale: _animation,
+                  child: Container(key: _menuKey, child: widget.menu),
+                ),
+              );
+            },
           ),
           Positioned(
             top: widget.childRect.top,
@@ -159,8 +257,8 @@ class _QuickMenuPageState extends State<QuickMenuPage>
                   if (widget.childShadowColor != null) {
                     boxShadow = [
                       BoxShadow(
-                        spreadRadius: 4 * _animation.value,
-                        blurRadius: 4 * _animation.value,
+                        spreadRadius: 8 * _animation.value,
+                        blurRadius: 8 * _animation.value,
                         color: widget.childShadowColor!.withAlpha(
                           (16 * _animation.value).toInt(),
                         ),
@@ -188,67 +286,6 @@ class _QuickMenuPageState extends State<QuickMenuPage>
                 child: widget.child,
               ),
             ),
-          ),
-          AnimatedBuilder(
-            animation: _animation,
-            builder: (BuildContext ctx, Widget? cld) {
-              final double animateIncrement = -increment * _animation.value;
-              final double animateSpace = space.abs() * _animation.value;
-
-              final Size? menuSize = _getMenuSize();
-
-              Alignment alignment = Alignment.topLeft;
-              double top;
-              double? left;
-              double? right;
-              if (menuSize == null) {
-                left = animateIncrement;
-                top = childBottom + animateIncrement;
-              } else {
-                final double menuWidth = menuSize.width;
-                final double menuHeight = menuSize.height;
-                final bool overWidth = -increment + menuWidth > _screenWidth;
-                final bool overHeight =
-                    space + childBottom + menuHeight > _screenHeight;
-
-                if (overWidth) {
-                  right = animateIncrement;
-
-                  if (overHeight) {
-                    top = widget.childRect.top - menuSize.height - animateSpace;
-
-                    alignment = Alignment.bottomRight;
-                  } else {
-                    top = childBottom + animateSpace;
-
-                    alignment = Alignment.topRight;
-                  }
-                } else {
-                  left = animateIncrement;
-
-                  if (overHeight) {
-                    top = widget.childRect.top - menuSize.height - animateSpace;
-
-                    alignment = Alignment.bottomLeft;
-                  } else {
-                    top = childBottom + animateSpace;
-
-                    alignment = Alignment.topLeft;
-                  }
-                }
-              }
-
-              return Positioned(
-                left: left,
-                right: right,
-                top: top,
-                child: ScaleTransition(
-                  alignment: alignment,
-                  scale: _animation,
-                  child: Container(key: _menuKey, child: widget.menu),
-                ),
-              );
-            },
           ),
         ],
       ),

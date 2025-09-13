@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:quick_menu/src/quick_menu_controller.dart';
 import 'package:quick_menu/src/quick_menu_page.dart';
 
 typedef OverlayBuilder = Widget Function(Widget child);
 
 class QuickMenu extends StatefulWidget {
+  final QuickMenuController? controller;
   final Widget? menu;
   final Color barrierColor;
   final double? overlayRadius;
@@ -23,6 +25,7 @@ class QuickMenu extends StatefulWidget {
 
   const QuickMenu({
     super.key,
+    this.controller,
     this.menu,
     this.barrierColor = Colors.black,
     this.overlayRadius = 16,
@@ -48,6 +51,8 @@ class _QuickMenuState extends State<QuickMenu>
     with SingleTickerProviderStateMixin {
   final GlobalKey _key = GlobalKey();
 
+  bool _open = false;
+
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -55,16 +60,46 @@ class _QuickMenuState extends State<QuickMenu>
   void initState() {
     super.initState();
 
-    _controller = AnimationController(vsync: this, duration: Durations.short3);
+    _controller = AnimationController(vsync: this, duration: Durations.short4);
 
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+
+    _initControllerListener();
+  }
+
+  @override
+  void didUpdateWidget(QuickMenu oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.controller != oldWidget.controller) {
+      _disposeControllerListener(oldWidget);
+
+      _initControllerListener();
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
 
+    _disposeControllerListener(widget);
+
     super.dispose();
+  }
+
+  void _initControllerListener() {
+    widget.controller?.addListener(_controllerListener);
+  }
+
+  void _disposeControllerListener(QuickMenu quickMenu) {
+    quickMenu.controller?.removeListener(_controllerListener);
+  }
+
+  void _controllerListener() {
+    final bool open = widget.controller!.isOpen;
+    if (open && !_open) {
+      _showCustomMenu();
+    }
   }
 
   Rect? _getRect() {
@@ -85,7 +120,7 @@ class _QuickMenuState extends State<QuickMenu>
       return;
     }
 
-    widget.haptic?.call();
+    _open = true;
 
     widget.onOpenMenu?.call();
 
@@ -95,8 +130,9 @@ class _QuickMenuState extends State<QuickMenu>
         opaque: false,
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
-        pageBuilder: (BuildContext ctx, _, _) {
+        pageBuilder: (_, _, _) {
           return QuickMenuPage(
+            controller: widget.controller,
             barrierColor: widget.barrierColor,
             childRadius: widget.overlayRadius,
             childShadowColor: widget.overlayShadowColor,
@@ -110,11 +146,15 @@ class _QuickMenuState extends State<QuickMenu>
         },
       ),
     ).then((_) {
+      _open = false;
+
       widget.onMenuClosed?.call();
     });
   }
 
   void _onTapDown(TapDownDetails details) {
+    widget.onTapDown?.call(details);
+
     _controller.forward();
   }
 
@@ -131,6 +171,8 @@ class _QuickMenuState extends State<QuickMenu>
   void _onLongPress() {
     widget.onLongPress?.call();
 
+    widget.haptic?.call();
+
     _controller.reverse().then(_showCustomMenu);
   }
 
@@ -138,7 +180,6 @@ class _QuickMenuState extends State<QuickMenu>
   Widget build(BuildContext context) {
     final Widget child = GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTapDown: widget.onTapDown,
       onTap: widget.onTap,
       child: widget.child,
     );
