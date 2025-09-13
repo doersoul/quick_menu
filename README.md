@@ -21,7 +21,7 @@ QuickMenu(
 );
 ```
 
-# example
+# Example
 ```dart
 import 'package:flutter/material.dart';
 import 'package:quick_menu/quick_menu.dart';
