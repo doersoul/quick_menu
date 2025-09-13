@@ -1,5 +1,5 @@
 # quick_menu
-Long press to display quick menu in flutter app
+Quick menu in app，like 3D touch quick actions，
 
 # Screenshots
 |![](https://github.com/doersoul/quick_menu/blob/main/screenshots/1.png)|![](https://github.com/doersoul/quick_menu/blob/main/screenshots/2.png)|![](https://github.com/doersoul/quick_menu/blob/main/screenshots/3.png)|
