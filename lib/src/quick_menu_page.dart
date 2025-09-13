@@ -255,10 +255,12 @@ class _QuickMenuPageState extends State<QuickMenuPage>
                   borderRadius = BorderRadius.circular(radius);
 
                   if (widget.childShadowColor != null) {
+                    final double shadowRadius = 8 * _animation.value;
+
                     boxShadow = [
                       BoxShadow(
-                        spreadRadius: 8 * _animation.value,
-                        blurRadius: 8 * _animation.value,
+                        spreadRadius: shadowRadius,
+                        blurRadius: shadowRadius,
                         color: widget.childShadowColor!.withAlpha(
                           (16 * _animation.value).toInt(),
                         ),

@@ -188,6 +188,8 @@ class _QuickMenuState extends State<QuickMenu>
       return child;
     }
 
+    final double increment = widget.overlayScaleIncrement.abs();
+
     return GestureDetector(
       key: _key,
       behavior: HitTestBehavior.translucent,
@@ -200,7 +202,7 @@ class _QuickMenuState extends State<QuickMenu>
         animation: _animation,
         builder: (_, _) {
           return Transform.scale(
-            scale: 1 - widget.overlayScaleIncrement.abs() * _animation.value,
+            scale: 1 - increment * _animation.value,
             child: child,
           );
         },
