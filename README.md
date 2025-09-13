@@ -1,2 +1,2 @@
 # quick_menu
-Long press to display menu in flutter app
+Long press to display quick menu in flutter app
