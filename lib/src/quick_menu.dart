@@ -62,7 +62,7 @@ class _QuickMenuState extends State<QuickMenu>
 
     _controller = AnimationController(vsync: this, duration: Durations.short4);
 
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
 
     _initControllerListener();
   }
