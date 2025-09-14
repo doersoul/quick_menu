@@ -28,7 +28,7 @@ class QuickMenu extends StatefulWidget {
     this.controller,
     this.menu,
     this.barrierColor = Colors.black,
-    this.overlayRadius = 16,
+    this.overlayRadius = 12,
     this.overlayShadowColor = Colors.black,
     this.overlayScaleIncrement = -0.1,
     this.overlayBuilder,
