@@ -163,7 +163,7 @@ class _QuickMenuPageState extends State<QuickMenuPage>
             child: AnimatedBuilder(
               animation: _animation,
               builder: (_, _) {
-                final double sigma = 8 * _animation.value;
+                final double sigma = 10 * _animation.value;
 
                 return BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
