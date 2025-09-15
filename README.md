@@ -146,6 +146,7 @@ class _ChatItemState extends State<ChatItem> {
       color: _color,
       child: QuickMenu(
         controller: _controller,
+        overlayShadowEnable: true,
         onTapDown: _setColor,
         onTapCancel: _resetColor,
         onTap: _resetColor,
