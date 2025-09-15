@@ -7,7 +7,7 @@ class QuickMenuPage extends StatefulWidget {
   final QuickMenuController? controller;
   final Color barrierColor;
   final double? childRadius;
-  final Color? childShadowColor;
+  final bool childShadowEnable;
   final Rect childRect;
   final double childScaleIncrement;
   final VoidCallback? onTap;
@@ -20,7 +20,7 @@ class QuickMenuPage extends StatefulWidget {
     this.controller,
     required this.barrierColor,
     this.childRadius,
-    this.childShadowColor,
+    required this.childShadowEnable,
     required this.childRect,
     required this.childScaleIncrement,
     this.onTap,
@@ -51,10 +51,7 @@ class _QuickMenuPageState extends State<QuickMenuPage>
 
     _controller = AnimationController(vsync: this, duration: Durations.short4);
 
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.fastOutSlowIn,
-    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
     _initControllerListener();
 
@@ -125,9 +122,11 @@ class _QuickMenuPageState extends State<QuickMenuPage>
   void _close([VoidCallback? callback]) {
     widget.onCloseMenu?.call();
 
+    final NavigatorState navigator = Navigator.of(context);
+
     _controller.reverse().then((_) {
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+      if (navigator.canPop()) {
+        navigator.pop();
       }
 
       callback?.call();
@@ -260,14 +259,14 @@ class _QuickMenuPageState extends State<QuickMenuPage>
 
                   borderRadius = BorderRadius.circular(radius);
 
-                  if (widget.childShadowColor != null) {
+                  if (widget.childShadowEnable) {
                     final double shadowRadius = 8 * _animation.value;
 
                     boxShadow = [
                       BoxShadow(
                         spreadRadius: shadowRadius,
                         blurRadius: shadowRadius,
-                        color: widget.childShadowColor!.withAlpha(
+                        color: widget.barrierColor.withAlpha(
                           (16 * _animation.value).toInt(),
                         ),
                       ),

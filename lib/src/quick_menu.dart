@@ -10,13 +10,12 @@ class QuickMenu extends StatefulWidget {
   final Widget? menu;
   final Color barrierColor;
   final double? overlayRadius;
-  final Color? overlayShadowColor;
+  final bool overlayShadowEnable;
   final double overlayScaleIncrement;
   final OverlayBuilder? overlayBuilder;
   final GestureTapDownCallback? onTapDown;
   final VoidCallback? onTapCancel;
   final VoidCallback? onTap;
-  final VoidCallback? onLongPress;
   final VoidCallback? onOpenMenu;
   final VoidCallback? onCloseMenu;
   final VoidCallback? onMenuClosed;
@@ -29,17 +28,16 @@ class QuickMenu extends StatefulWidget {
     this.menu,
     this.barrierColor = Colors.black,
     this.overlayRadius = 12,
-    this.overlayShadowColor = Colors.black,
+    this.overlayShadowEnable = false,
     this.overlayScaleIncrement = -0.1,
     this.overlayBuilder,
     this.onTapDown,
     this.onTapCancel,
     this.onTap,
-    this.onLongPress,
     this.onOpenMenu,
     this.onCloseMenu,
     this.onMenuClosed,
-    this.haptic = HapticFeedback.mediumImpact,
+    this.haptic = HapticFeedback.lightImpact,
     required this.child,
   });
 
@@ -62,7 +60,7 @@ class _QuickMenuState extends State<QuickMenu>
 
     _controller = AnimationController(vsync: this, duration: Durations.short4);
 
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
     _initControllerListener();
   }
@@ -135,7 +133,7 @@ class _QuickMenuState extends State<QuickMenu>
             controller: widget.controller,
             barrierColor: widget.barrierColor,
             childRadius: widget.overlayRadius,
-            childShadowColor: widget.overlayShadowColor,
+            childShadowEnable: widget.overlayShadowEnable,
             childRect: rect,
             childScaleIncrement: widget.overlayScaleIncrement,
             onTap: widget.onTap,
@@ -155,7 +153,11 @@ class _QuickMenuState extends State<QuickMenu>
   void _onTapDown(TapDownDetails details) {
     widget.onTapDown?.call(details);
 
-    _controller.forward();
+    _controller.forward().whenComplete(() {
+      widget.haptic?.call();
+
+      _controller.reverse();
+    });
   }
 
   void _onTapCancel() {
@@ -168,12 +170,8 @@ class _QuickMenuState extends State<QuickMenu>
     _controller.reverse();
   }
 
-  void _onLongPress() {
-    widget.onLongPress?.call();
-
-    widget.haptic?.call();
-
-    _controller.reverse().then(_showCustomMenu);
+  void _onLongPressStart(LongPressStartDetails details) {
+    _showCustomMenu();
   }
 
   @override
@@ -188,7 +186,7 @@ class _QuickMenuState extends State<QuickMenu>
       return child;
     }
 
-    final double increment = widget.overlayScaleIncrement.abs();
+    final double increment = widget.overlayScaleIncrement.abs() / 2;
 
     return GestureDetector(
       key: _key,
@@ -197,7 +195,7 @@ class _QuickMenuState extends State<QuickMenu>
       onTapUp: _onReverse,
       onTapMove: _onReverse,
       onTapCancel: _onTapCancel,
-      onLongPress: _onLongPress,
+      onLongPressStart: _onLongPressStart,
       child: AnimatedBuilder(
         animation: _animation,
         builder: (_, _) {
