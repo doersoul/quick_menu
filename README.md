@@ -123,7 +123,7 @@ class _ChatItemState extends State<ChatItem> {
         height: 300,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: const Center(child: Text('Menus')),
       ),
@@ -190,7 +190,7 @@ class _MenuItemState extends State<MenuItem> {
         height: 300,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: const Center(child: Text('Menus')),
       ),
