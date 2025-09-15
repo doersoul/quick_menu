@@ -96,7 +96,7 @@ class _QuickMenuState extends State<QuickMenu>
   void _controllerListener() {
     final bool open = widget.controller!.isOpen;
     if (open && !_open) {
-      _showCustomMenu();
+      _openMenu();
     }
   }
 
@@ -112,7 +112,7 @@ class _QuickMenuState extends State<QuickMenu>
     return Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
   }
 
-  void _showCustomMenu([_]) {
+  void _openMenu() {
     final Rect? rect = _getRect();
     if (rect == null) {
       return;
@@ -171,7 +171,7 @@ class _QuickMenuState extends State<QuickMenu>
   }
 
   void _onLongPressStart(LongPressStartDetails details) {
-    _showCustomMenu();
+    _openMenu();
   }
 
   @override

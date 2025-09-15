@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class QuickMenuController extends ChangeNotifier {
   bool _open = false;
@@ -11,9 +11,13 @@ class QuickMenuController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void close() {
+  Future<void> close([VoidCallback? pushCallback]) async {
     _open = false;
 
     notifyListeners();
+
+    if (pushCallback != null) {
+      Future.delayed(Durations.medium1, pushCallback);
+    }
   }
 }
