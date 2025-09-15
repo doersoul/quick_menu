@@ -233,11 +233,11 @@ class _QuickMenuPageState extends State<QuickMenuPage>
                 left: left,
                 right: right,
                 top: top,
-                child: FadeTransition(
-                  opacity: _animation,
-                  child: ScaleTransition(
+                child: Opacity(
+                  opacity: _animation.value,
+                  child: Transform.scale(
                     alignment: alignment,
-                    scale: _animation,
+                    scale: _animation.value,
                     child: Container(key: _menuKey, child: widget.menu),
                   ),
                 ),

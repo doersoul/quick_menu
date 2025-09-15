@@ -118,14 +118,40 @@ class _ChatItemState extends State<ChatItem> {
   Widget build(BuildContext context) {
     final Widget menu = GestureDetector(
       onTap: _onTapMenu,
-      child: Container(
+      child: SizedBox(
         width: 200,
-        height: 300,
-        decoration: BoxDecoration(
-          color: Colors.white,
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
+          child: Column(
+            spacing: 0.3,
+            children: [
+              Container(
+                color: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [Text('Menu'), Icon(Icons.add)],
+                ),
+              ),
+              Container(
+                color: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [Text('Menu'), Icon(Icons.add)],
+                ),
+              ),
+              Container(
+                color: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [Text('Menu'), Icon(Icons.add)],
+                ),
+              ),
+            ],
+          ),
         ),
-        child: const Center(child: Text('Menus')),
       ),
     );
 
@@ -146,7 +172,6 @@ class _ChatItemState extends State<ChatItem> {
       color: _color,
       child: QuickMenu(
         controller: _controller,
-        overlayShadowEnable: true,
         onTapDown: _setColor,
         onTapCancel: _resetColor,
         onTap: _resetColor,
@@ -183,16 +208,23 @@ class _MenuItemState extends State<MenuItem> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget menuItem = Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [Text('Menu'), Icon(Icons.add)],
+      ),
+    );
+
     final Widget menu = GestureDetector(
       onTap: _onTapMenu,
-      child: Container(
+      child: SizedBox(
         width: 200,
-        height: 300,
-        decoration: BoxDecoration(
-          color: Colors.white,
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
+          child: Column(spacing: 0.3, children: [menuItem, menuItem, menuItem]),
         ),
-        child: const Center(child: Text('Menus')),
       ),
     );
 

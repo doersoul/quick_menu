@@ -37,7 +37,7 @@ class QuickMenu extends StatefulWidget {
     this.onOpenMenu,
     this.onCloseMenu,
     this.onMenuClosed,
-    this.haptic = HapticFeedback.lightImpact,
+    this.haptic = HapticFeedback.mediumImpact,
     required this.child,
   });
 
