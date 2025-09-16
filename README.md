@@ -48,34 +48,29 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        title: Text('Quick Menu Demo'),
-      ),
-      body: Column(
-        children: [
-          const ChatItem(),
-          const ChatItem(),
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-              ),
-              itemCount: 16,
-              itemBuilder: (ctx, idx) {
-                return const Center(child: MenuItem());
-              },
-            ),
+    @override
+    Widget build(BuildContext context) {
+      final ChatItem chatItem = const ChatItem();
+
+      final Widget grid = Expanded(
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
           ),
-          const ChatItem(),
-          const ChatItem(),
-          const ChatItem(),
-        ],
-      ),
-    );
+          itemCount: 16,
+          itemBuilder: (ctx, idx) {
+            return const Center(child: MenuItem());
+          },
+        ),
+      );
+
+      return Scaffold(
+        appBar: AppBar(title: Text('Quick Menu Demo')),
+        body: Column(
+          children: [chatItem, chatItem, grid, chatItem, chatItem, chatItem],
+        ),
+      );
+    }
   }
 }
 
@@ -116,41 +111,22 @@ class _ChatItemState extends State<ChatItem> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget menuItem = Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [Text('Menu'), Icon(Icons.add)],
+      ),
+    );
+
     final Widget menu = GestureDetector(
       onTap: _onTapMenu,
       child: SizedBox(
         width: 200,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Column(
-            spacing: 0.3,
-            children: [
-              Container(
-                color: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('Menu'), Icon(Icons.add)],
-                ),
-              ),
-              Container(
-                color: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('Menu'), Icon(Icons.add)],
-                ),
-              ),
-              Container(
-                color: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text('Menu'), Icon(Icons.add)],
-                ),
-              ),
-            ],
-          ),
+          child: Column(spacing: 0.3, children: [menuItem, menuItem, menuItem]),
         ),
       ),
     );
@@ -172,6 +148,7 @@ class _ChatItemState extends State<ChatItem> {
       color: _color,
       child: QuickMenu(
         controller: _controller,
+        // overlayScaleIncrement: -(16 * 2 / _screenWidth),
         onTapDown: _setColor,
         onTapCancel: _resetColor,
         onTap: _resetColor,
@@ -241,6 +218,7 @@ class _MenuItemState extends State<MenuItem> {
     return QuickMenu(
       controller: _controller,
       overlayRadius: null,
+      // overlayScaleIncrement: 16 * 2 / 64,
       overlayScaleIncrement: 0.5,
       menu: menu,
       child: child,
