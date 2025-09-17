@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(colorScheme: const ColorScheme.light()),
       home: const HomePage(),
     );
@@ -45,32 +46,31 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
   @override
   Widget build(BuildContext context) {
-    @override
-    Widget build(BuildContext context) {
-      final ChatItem chatItem = const ChatItem();
+    final ChatItem chatItem = const ChatItem();
 
-      final Widget grid = Expanded(
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-          ),
-          itemCount: 16,
-          itemBuilder: (ctx, idx) {
-            return const Center(child: MenuItem());
-          },
+    final Widget grid = Expanded(
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
         ),
-      );
+        itemCount: 16,
+        itemBuilder: (ctx, idx) {
+          return const Center(child: MenuItem());
+        },
+      ),
+    );
 
-      return Scaffold(
-        appBar: AppBar(title: Text('Quick Menu Demo')),
-        body: Column(
-          children: [chatItem, chatItem, grid, chatItem, chatItem, chatItem],
-        ),
-      );
-    }
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Quick Menu Demo'),
+        surfaceTintColor: Colors.transparent,
+      ),
+      body: Column(
+        children: [chatItem, chatItem, grid, chatItem, chatItem, chatItem],
+      ),
+    );
   }
 }
 
@@ -85,6 +85,15 @@ class _ChatItemState extends State<ChatItem> {
   final QuickMenuController _controller = QuickMenuController();
 
   Color _color = Colors.transparent;
+
+  late double _screenWidth;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _screenWidth = MediaQuery.sizeOf(context).width;
+  }
 
   @override
   void dispose() {
@@ -111,6 +120,8 @@ class _ChatItemState extends State<ChatItem> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget line = Container(height: 0.1, color: Colors.grey);
+
     final Widget menuItem = Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -123,10 +134,10 @@ class _ChatItemState extends State<ChatItem> {
     final Widget menu = GestureDetector(
       onTap: _onTapMenu,
       child: SizedBox(
-        width: 200,
+        width: _screenWidth * 0.618,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Column(spacing: 0.3, children: [menuItem, menuItem, menuItem]),
+          child: Column(children: [menuItem, line, menuItem, line, menuItem]),
         ),
       ),
     );
@@ -136,7 +147,7 @@ class _ChatItemState extends State<ChatItem> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: Colors.amber,
+          color: Colors.black,
           borderRadius: BorderRadius.circular(48),
         ),
       ),
@@ -148,7 +159,7 @@ class _ChatItemState extends State<ChatItem> {
       color: _color,
       child: QuickMenu(
         controller: _controller,
-        // overlayScaleIncrement: -(16 * 2 / _screenWidth),
+        overlayScaleIncrement: -(16 * 2 / _screenWidth),
         onTapDown: _setColor,
         onTapCancel: _resetColor,
         onTap: _resetColor,
@@ -185,6 +196,8 @@ class _MenuItemState extends State<MenuItem> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget line = Container(height: 0.1, color: Colors.grey);
+
     final Widget menuItem = Container(
       color: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
@@ -197,10 +210,10 @@ class _MenuItemState extends State<MenuItem> {
     final Widget menu = GestureDetector(
       onTap: _onTapMenu,
       child: SizedBox(
-        width: 200,
+        width: 210,
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Column(spacing: 0.3, children: [menuItem, menuItem, menuItem]),
+          child: Column(children: [menuItem, line, menuItem, line, menuItem]),
         ),
       ),
     );
@@ -210,16 +223,15 @@ class _MenuItemState extends State<MenuItem> {
       height: 64,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(64),
-        color: Colors.teal,
+        color: Colors.black,
       ),
-      child: Icon(Icons.sunny),
+      child: Icon(Icons.sunny, color: Colors.white),
     );
 
     return QuickMenu(
       controller: _controller,
       overlayRadius: null,
-      // overlayScaleIncrement: 16 * 2 / 64,
-      overlayScaleIncrement: 0.5,
+      overlayScaleIncrement: 8 * 2 / 64,
       menu: menu,
       child: child,
     );
