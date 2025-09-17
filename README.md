@@ -16,7 +16,7 @@ dependencies:
 
 ```dart
 QuickMenu(
-  menu: menu,
+  menuBuilder: _buildMenu,
   child: child,
 );
 ```
