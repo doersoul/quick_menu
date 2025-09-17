@@ -161,94 +161,18 @@ class _QuickMenuPageState extends State<QuickMenuPage>
 
     final double childBottom = widget.childRect.top + widget.childRect.height;
 
-    final List<Widget> stack = [];
-
-    // barrier
-    stack.add(
-      GestureDetector(
-        onTap: _onPop,
-        child: AnimatedBuilder(
-          animation: _animation,
-          builder: (_, _) {
-            final double sigma = 10 * _animation.value;
-
-            return BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
-              child: Container(
-                color: widget.barrierColor.withAlpha(
-                  (16 * _animation.value).toInt(),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
-    );
-
-    // menu
-    stack.add(
-      AnimatedBuilder(
+    final Widget barrier = GestureDetector(
+      onTap: _onPop,
+      child: AnimatedBuilder(
         animation: _animation,
         builder: (_, _) {
-          final double animateIncrement = -increment * _animation.value;
-          final double animateSpace = space.abs() * _animation.value;
-          final Size? menuSize = _getMenuSize();
+          final double sigma = 10 * _animation.value;
 
-          Alignment alignment = Alignment.topLeft;
-          double? left;
-          double? right;
-          double top;
-
-          if (menuSize == null) {
-            left = animateIncrement;
-            top = childBottom + animateIncrement;
-          } else {
-            final double menuWidth = menuSize.width;
-            final double menuHeight = menuSize.height;
-
-            final bool overWidth =
-                -increment + widget.childRect.left + menuWidth > _screenWidth;
-
-            final bool overHeight =
-                space + childBottom + menuHeight > _screenHeight;
-
-            if (overWidth) {
-              right = _screenWidth - widget.childRect.right + animateIncrement;
-
-              if (overHeight) {
-                top = widget.childRect.top - menuSize.height - animateSpace;
-
-                alignment = Alignment.bottomRight;
-              } else {
-                top = childBottom + animateSpace;
-
-                alignment = Alignment.topRight;
-              }
-            } else {
-              left = widget.childRect.left + animateIncrement;
-
-              if (overHeight) {
-                top = widget.childRect.top - menuSize.height - animateSpace;
-
-                alignment = Alignment.bottomLeft;
-              } else {
-                top = childBottom + animateSpace;
-
-                alignment = Alignment.topLeft;
-              }
-            }
-          }
-
-          return Positioned(
-            left: left,
-            right: right,
-            top: top,
-            child: Opacity(
-              opacity: _animation.value,
-              child: Transform.scale(
-                alignment: alignment,
-                scale: _animation.value,
-                child: Container(key: _menuKey, child: widget.menu),
+          return BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+            child: Container(
+              color: widget.barrierColor.withAlpha(
+                (16 * _animation.value).toInt(),
               ),
             ),
           );
@@ -256,56 +180,121 @@ class _QuickMenuPageState extends State<QuickMenuPage>
       ),
     );
 
-    // overlay
-    stack.add(
-      Positioned(
-        top: widget.childRect.top,
-        left: widget.childRect.left,
-        width: widget.childRect.width,
-        height: widget.childRect.height,
-        child: AnimatedBuilder(
-          animation: _animation,
-          builder: (BuildContext ctx, Widget? cld) {
-            BorderRadiusGeometry? borderRadius;
-            List<BoxShadow>? boxShadow;
-            if (widget.childRadius != null) {
-              final double radius = widget.childRadius! * _animation.value;
+    final Widget menu = AnimatedBuilder(
+      animation: _animation,
+      builder: (_, _) {
+        final double animateIncrement = -increment * _animation.value;
+        final double animateSpace = space.abs() * _animation.value;
+        final Size? menuSize = _getMenuSize();
 
-              borderRadius = BorderRadius.circular(radius);
+        Alignment alignment = Alignment.topLeft;
+        double? left;
+        double? right;
+        double top;
 
-              if (widget.childShadowEnable) {
-                final double shadowRadius = 8 * _animation.value;
+        if (menuSize == null) {
+          left = animateIncrement;
+          top = childBottom + animateIncrement;
+        } else {
+          final double menuWidth = menuSize.width;
+          final double menuHeight = menuSize.height;
 
-                boxShadow = [
-                  BoxShadow(
-                    spreadRadius: shadowRadius,
-                    blurRadius: shadowRadius,
-                    color: widget.barrierColor.withAlpha(
-                      (16 * _animation.value).toInt(),
-                    ),
+          final bool overWidth =
+              -increment + widget.childRect.left + menuWidth > _screenWidth;
+
+          final bool overHeight =
+              space + childBottom + menuHeight > _screenHeight;
+
+          if (overWidth) {
+            right = _screenWidth - widget.childRect.right + animateIncrement;
+
+            if (overHeight) {
+              top = widget.childRect.top - menuSize.height - animateSpace;
+
+              alignment = Alignment.bottomRight;
+            } else {
+              top = childBottom + animateSpace;
+
+              alignment = Alignment.topRight;
+            }
+          } else {
+            left = widget.childRect.left + animateIncrement;
+
+            if (overHeight) {
+              top = widget.childRect.top - menuSize.height - animateSpace;
+
+              alignment = Alignment.bottomLeft;
+            } else {
+              top = childBottom + animateSpace;
+
+              alignment = Alignment.topLeft;
+            }
+          }
+        }
+
+        return Positioned(
+          left: left,
+          right: right,
+          top: top,
+          child: Opacity(
+            opacity: _animation.value,
+            child: Transform.scale(
+              alignment: alignment,
+              scale: _animation.value,
+              child: Container(key: _menuKey, child: widget.menu),
+            ),
+          ),
+        );
+      },
+    );
+
+    final Widget overlay = Positioned(
+      top: widget.childRect.top,
+      left: widget.childRect.left,
+      width: widget.childRect.width,
+      height: widget.childRect.height,
+      child: AnimatedBuilder(
+        animation: _animation,
+        builder: (BuildContext ctx, Widget? cld) {
+          BorderRadiusGeometry? borderRadius;
+          List<BoxShadow>? boxShadow;
+          if (widget.childRadius != null) {
+            final double radius = widget.childRadius! * _animation.value;
+
+            borderRadius = BorderRadius.circular(radius);
+
+            if (widget.childShadowEnable) {
+              final double shadowRadius = 8 * _animation.value;
+
+              boxShadow = [
+                BoxShadow(
+                  spreadRadius: shadowRadius,
+                  blurRadius: shadowRadius,
+                  color: widget.barrierColor.withAlpha(
+                    (16 * _animation.value).toInt(),
                   ),
-                ];
-              }
-
-              cld = ClipRRect(borderRadius: borderRadius, child: cld);
+                ),
+              ];
             }
 
-            return Transform.scale(
-              scale: 1 + widget.childScaleIncrement * _animation.value,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: borderRadius,
-                  boxShadow: boxShadow,
-                ),
-                child: cld,
+            cld = ClipRRect(borderRadius: borderRadius, child: cld);
+          }
+
+          return Transform.scale(
+            scale: 1 + widget.childScaleIncrement * _animation.value,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: borderRadius,
+                boxShadow: boxShadow,
               ),
-            );
-          },
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: _onTap,
-            child: widget.child,
-          ),
+              child: cld,
+            ),
+          );
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: _onTap,
+          child: widget.child,
         ),
       ),
     );
@@ -315,7 +304,7 @@ class _QuickMenuPageState extends State<QuickMenuPage>
       onPopInvokedWithResult: _onPopInvokedWithResult,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Stack(children: stack),
+        body: Stack(children: [barrier, menu, overlay]),
       ),
     );
   }
