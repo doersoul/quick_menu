@@ -85,7 +85,7 @@ class ChatItem extends StatefulWidget {
 class _ChatItemState extends State<ChatItem> {
   final QuickMenuController _controller = QuickMenuController();
 
-  Color _color = Colors.transparent;
+  final ValueNotifier<Color> _color = ValueNotifier(Colors.transparent);
 
   late double _screenWidth;
 
@@ -104,24 +104,22 @@ class _ChatItemState extends State<ChatItem> {
   }
 
   void _setColor([_]) {
-    setState(() {
-      _color = Colors.grey.shade100;
-    });
+    _color.value = Colors.grey.shade100;
   }
 
   void _resetColor([_]) {
-    setState(() {
-      _color = Colors.transparent;
-    });
+    _color.value = Colors.transparent;
   }
 
   void _onTapMenu() {
     _controller.close();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final Widget line = Container(height: 0.1, color: Colors.grey);
+  Widget? _buildMenu(BuildContext ctx, Widget overlay, Rect childRect) {
+    const Widget line = ColoredBox(
+      color: Colors.grey,
+      child: SizedBox(height: 0.1, width: double.infinity),
+    );
 
     final Widget menuItem = Container(
       color: Colors.white,
@@ -132,7 +130,7 @@ class _ChatItemState extends State<ChatItem> {
       ),
     );
 
-    final Widget menu = GestureDetector(
+    return GestureDetector(
       onTap: _onTapMenu,
       child: SizedBox(
         width: _screenWidth * 0.618,
@@ -142,22 +140,15 @@ class _ChatItemState extends State<ChatItem> {
         ),
       ),
     );
+  }
 
-    final Widget child = ListTile(
-      leading: Container(
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(48),
-        ),
-      ),
-      title: Text('Quick Menu'),
-      subtitle: Text('nice to meet you'),
-    );
-
-    return Container(
-      color: _color,
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Color>(
+      valueListenable: _color,
+      builder: (BuildContext ctx, Color color, Widget? cld) {
+        return ColoredBox(color: color, child: cld);
+      },
       child: QuickMenu(
         controller: _controller,
         overlayScaleIncrement: -(16 * 2 / _screenWidth),
@@ -167,8 +158,19 @@ class _ChatItemState extends State<ChatItem> {
         overlayBuilder: (Widget cld) {
           return ColoredBox(color: Colors.white, child: cld);
         },
-        menu: menu,
-        child: child,
+        menuBuilder: _buildMenu,
+        child: ListTile(
+          leading: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(48),
+            ),
+          ),
+          title: Text('Quick Menu'),
+          subtitle: Text('nice to meet you'),
+        ),
       ),
     );
   }
@@ -195,9 +197,11 @@ class _MenuItemState extends State<MenuItem> {
     _controller.close();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final Widget line = Container(height: 0.1, color: Colors.grey);
+  Widget? _buildMenu(BuildContext ctx, Widget overlay, Rect childRect) {
+    const Widget line = ColoredBox(
+      color: Colors.grey,
+      child: SizedBox(height: 0.1, width: double.infinity),
+    );
 
     final Widget menuItem = Container(
       color: Colors.white,
@@ -208,7 +212,7 @@ class _MenuItemState extends State<MenuItem> {
       ),
     );
 
-    final Widget menu = GestureDetector(
+    return GestureDetector(
       onTap: _onTapMenu,
       child: SizedBox(
         width: 210,
@@ -218,23 +222,24 @@ class _MenuItemState extends State<MenuItem> {
         ),
       ),
     );
+  }
 
-    final Widget child = Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(64),
-        color: Colors.black,
-      ),
-      child: Icon(Icons.sunny, color: Colors.white),
-    );
-
+  @override
+  Widget build(BuildContext context) {
     return QuickMenu(
       controller: _controller,
       overlayRadius: null,
       overlayScaleIncrement: 8 * 2 / 64,
-      menu: menu,
-      child: child,
+      menuBuilder: _buildMenu,
+      child: Container(
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(64),
+          color: Colors.black,
+        ),
+        child: Icon(Icons.sunny, color: Colors.white),
+      ),
     );
   }
 }

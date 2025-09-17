@@ -5,13 +5,16 @@ import 'package:quick_menu/src/quick_menu_page.dart';
 
 typedef OverlayBuilder = Widget Function(Widget child);
 
+typedef NullableMenuBuilder =
+    Widget? Function(BuildContext context, Widget overlay, Rect childRect);
+
 class QuickMenu extends StatefulWidget {
   final QuickMenuController? controller;
-  final Widget? menu;
   final Color barrierColor;
   final double? overlayRadius;
   final bool overlayShadowEnable;
   final double overlayScaleIncrement;
+  final NullableMenuBuilder menuBuilder;
   final OverlayBuilder? overlayBuilder;
   final GestureTapDownCallback? onTapDown;
   final VoidCallback? onTapCancel;
@@ -25,12 +28,12 @@ class QuickMenu extends StatefulWidget {
   const QuickMenu({
     super.key,
     this.controller,
-    this.menu,
     this.barrierColor = Colors.black,
     this.overlayRadius = 12,
     this.overlayShadowEnable = false,
     this.overlayScaleIncrement = -0.1,
     this.overlayBuilder,
+    required this.menuBuilder,
     this.onTapDown,
     this.onTapCancel,
     this.onTap,
@@ -118,6 +121,13 @@ class _QuickMenuState extends State<QuickMenu>
       return;
     }
 
+    Widget overlay = widget.overlayBuilder?.call(widget.child) ?? widget.child;
+
+    final Widget? menu = widget.menuBuilder(context, overlay, rect);
+    if (menu == null) {
+      return;
+    }
+
     _open = true;
 
     widget.onOpenMenu?.call();
@@ -138,8 +148,8 @@ class _QuickMenuState extends State<QuickMenu>
             childScaleIncrement: widget.overlayScaleIncrement,
             onTap: widget.onTap,
             onCloseMenu: widget.onCloseMenu,
-            menu: widget.menu!,
-            child: widget.overlayBuilder?.call(widget.child) ?? widget.child,
+            menu: menu,
+            child: overlay,
           );
         },
       ),
@@ -176,17 +186,13 @@ class _QuickMenuState extends State<QuickMenu>
 
   @override
   Widget build(BuildContext context) {
+    final double increment = widget.overlayScaleIncrement.abs() / 2;
+
     final Widget child = GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: widget.onTap,
       child: widget.child,
     );
-
-    if (widget.menu == null) {
-      return child;
-    }
-
-    final double increment = widget.overlayScaleIncrement.abs() / 2;
 
     return GestureDetector(
       key: _key,
