@@ -52,7 +52,7 @@ class _QuickMenuState extends State<QuickMenu>
     with SingleTickerProviderStateMixin {
   final GlobalKey _key = GlobalKey();
 
-  bool _open = false;
+  final ValueNotifier<bool> _open = ValueNotifier(false);
 
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -81,6 +81,8 @@ class _QuickMenuState extends State<QuickMenu>
 
   @override
   void dispose() {
+    _open.dispose();
+
     _controller.dispose();
 
     _disposeControllerListener(widget);
@@ -98,7 +100,7 @@ class _QuickMenuState extends State<QuickMenu>
 
   void _controllerListener() {
     final bool open = widget.controller!.isOpen;
-    if (open && !_open) {
+    if (open && !_open.value) {
       _openMenu();
     }
   }
@@ -128,36 +130,43 @@ class _QuickMenuState extends State<QuickMenu>
       return;
     }
 
-    _open = true;
+    _onOpenMenu();
+
+    final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
+
+    final PageRoute route = PageRouteBuilder(
+      opaque: false,
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+      pageBuilder: (_, _, _) {
+        return QuickMenuPage(
+          controller: widget.controller,
+          barrierColor: widget.barrierColor,
+          childRadius: widget.overlayRadius,
+          childShadowEnable: widget.overlayShadowEnable,
+          childRect: rect,
+          childScaleIncrement: widget.overlayScaleIncrement,
+          onTap: widget.onTap,
+          onCloseMenu: widget.onCloseMenu,
+          menu: menu,
+          child: overlay,
+        );
+      },
+    );
+
+    navigator.push(route).then(_onMenuClosed);
+  }
+
+  void _onOpenMenu() {
+    _open.value = true;
 
     widget.onOpenMenu?.call();
+  }
 
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        opaque: false,
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
-        pageBuilder: (_, _, _) {
-          return QuickMenuPage(
-            controller: widget.controller,
-            barrierColor: widget.barrierColor,
-            childRadius: widget.overlayRadius,
-            childShadowEnable: widget.overlayShadowEnable,
-            childRect: rect,
-            childScaleIncrement: widget.overlayScaleIncrement,
-            onTap: widget.onTap,
-            onCloseMenu: widget.onCloseMenu,
-            menu: menu,
-            child: overlay,
-          );
-        },
-      ),
-    ).then((_) {
-      _open = false;
+  void _onMenuClosed([_]) {
+    _open.value = false;
 
-      widget.onMenuClosed?.call();
-    });
+    widget.onMenuClosed?.call();
   }
 
   void _onTapDown(TapDownDetails details) {
@@ -188,12 +197,6 @@ class _QuickMenuState extends State<QuickMenu>
   Widget build(BuildContext context) {
     final double increment = widget.overlayScaleIncrement.abs() / 2;
 
-    final Widget child = GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: widget.onTap,
-      child: widget.child,
-    );
-
     return GestureDetector(
       key: _key,
       behavior: HitTestBehavior.translucent,
@@ -204,12 +207,22 @@ class _QuickMenuState extends State<QuickMenu>
       onLongPressStart: _onLongPressStart,
       child: AnimatedBuilder(
         animation: _animation,
-        builder: (_, _) {
+        builder: (_, Widget? cld) {
           return Transform.scale(
             scale: 1 - increment * _animation.value,
-            child: child,
+            child: cld,
           );
         },
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: widget.onTap,
+          child: ValueListenableBuilder<bool>(
+            valueListenable: _open,
+            builder: (_, bool value, _) {
+              return Visibility.maintain(visible: !value, child: widget.child);
+            },
+          ),
+        ),
       ),
     );
   }
