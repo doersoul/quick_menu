@@ -258,9 +258,9 @@ class _QuickMenuPageState extends State<QuickMenuPage>
         builder: (BuildContext ctx, Widget? cld) {
           BorderRadiusGeometry? borderRadius;
           List<BoxShadow>? boxShadow;
-          if (widget.childRadius != null) {
-            final double radius = widget.childRadius! * _animation.value;
 
+          if (widget.childRadius != null && widget.childRadius! > 0) {
+            final double radius = widget.childRadius! * _animation.value;
             borderRadius = BorderRadius.circular(radius);
 
             if (widget.childShadowEnable) {

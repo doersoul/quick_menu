@@ -1,5 +1,5 @@
 # quick_menu
-Quick menu in app，like 3D touch quick actions
+Press to display the quick menu, like 3D touch quick actions
 
 # Screenshots
 |![](https://github.com/doersoul/quick_menu/blob/main/screenshots/1.png?raw=true)|![](https://github.com/doersoul/quick_menu/blob/main/screenshots/2.png?raw=true)|![](https://github.com/doersoul/quick_menu/blob/main/screenshots/3.png?raw=true)|
@@ -115,7 +115,7 @@ class _ChatItemState extends State<ChatItem> {
     _controller.close();
   }
 
-  Widget? _buildMenu(BuildContext ctx, Widget overlay, Rect childRect) {
+  Widget? _buildMenu(BuildContext ctx, Rect childRect) {
     const Widget line = ColoredBox(
       color: Colors.grey,
       child: SizedBox(height: 0.1, width: double.infinity),
@@ -155,7 +155,7 @@ class _ChatItemState extends State<ChatItem> {
         onTapDown: _setColor,
         onTapCancel: _resetColor,
         onTap: _resetColor,
-        overlayBuilder: (Widget cld) {
+        overlayBuilder: (BuildContext ctx, Widget cld) {
           return ColoredBox(color: Colors.white, child: cld);
         },
         menuBuilder: _buildMenu,
@@ -197,7 +197,7 @@ class _MenuItemState extends State<MenuItem> {
     _controller.close();
   }
 
-  Widget? _buildMenu(BuildContext ctx, Widget overlay, Rect childRect) {
+  Widget? _buildMenu(BuildContext ctx, Rect childRect) {
     const Widget line = ColoredBox(
       color: Colors.grey,
       child: SizedBox(height: 0.1, width: double.infinity),

@@ -3,10 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:quick_menu/src/quick_menu_controller.dart';
 import 'package:quick_menu/src/quick_menu_page.dart';
 
-typedef OverlayBuilder = Widget Function(Widget child);
+typedef OverlayBuilder = Widget Function(BuildContext context, Widget child);
 
-typedef NullableMenuBuilder =
-    Widget? Function(BuildContext context, Widget overlay, Rect childRect);
+typedef MenuBuilder = Widget? Function(BuildContext context, Rect childRect);
 
 class QuickMenu extends StatefulWidget {
   final QuickMenuController? controller;
@@ -14,7 +13,7 @@ class QuickMenu extends StatefulWidget {
   final double? overlayRadius;
   final bool overlayShadowEnable;
   final double overlayScaleIncrement;
-  final NullableMenuBuilder menuBuilder;
+  final MenuBuilder menuBuilder;
   final OverlayBuilder? overlayBuilder;
   final GestureTapDownCallback? onTapDown;
   final VoidCallback? onTapCancel;
@@ -123,9 +122,12 @@ class _QuickMenuState extends State<QuickMenu>
       return;
     }
 
-    Widget overlay = widget.overlayBuilder?.call(widget.child) ?? widget.child;
+    Widget overlay = widget.child;
+    if (widget.overlayBuilder != null) {
+      overlay = widget.overlayBuilder!.call(context, widget.child);
+    }
 
-    final Widget? menu = widget.menuBuilder(context, overlay, rect);
+    final Widget? menu = widget.menuBuilder(context, rect);
     if (menu == null) {
       return;
     }
@@ -218,8 +220,8 @@ class _QuickMenuState extends State<QuickMenu>
           onTap: widget.onTap,
           child: ValueListenableBuilder<bool>(
             valueListenable: _open,
-            builder: (_, bool value, _) {
-              return Visibility.maintain(visible: !value, child: widget.child);
+            builder: (_, bool open, _) {
+              return Visibility.maintain(visible: !open, child: widget.child);
             },
           ),
         ),

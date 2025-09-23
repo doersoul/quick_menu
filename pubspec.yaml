@@ -1,7 +1,7 @@
 name: quick_menu
-description: "Long press to display menu in flutter app, like 3D touch quick actions"
+description: "Press to display the quick menu, like 3D touch quick actions"
 repository: https://github.com/doersoul/quick_menu
-version: 4.0.1
+version: 5.0.0
 
 environment:
   sdk: ^3.9.2
