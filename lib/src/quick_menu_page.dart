@@ -248,11 +248,8 @@ class _QuickMenuPageState extends State<QuickMenuPage>
       },
     );
 
-    final Widget overlay = Positioned(
-      top: widget.childRect.top,
-      left: widget.childRect.left,
-      width: widget.childRect.width,
-      height: widget.childRect.height,
+    final Widget overlay = Positioned.fromRect(
+      rect: widget.childRect,
       child: AnimatedBuilder(
         animation: _animation,
         builder: (BuildContext ctx, Widget? cld) {

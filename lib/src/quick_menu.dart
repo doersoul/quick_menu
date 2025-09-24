@@ -122,14 +122,14 @@ class _QuickMenuState extends State<QuickMenu>
       return;
     }
 
-    Widget overlay = widget.child;
-    if (widget.overlayBuilder != null) {
-      overlay = widget.overlayBuilder!.call(context, widget.child);
-    }
-
     final Widget? menu = widget.menuBuilder(context, rect);
     if (menu == null) {
       return;
+    }
+
+    Widget overlay = widget.child;
+    if (widget.overlayBuilder != null) {
+      overlay = widget.overlayBuilder!.call(context, widget.child);
     }
 
     _onOpenMenu();
