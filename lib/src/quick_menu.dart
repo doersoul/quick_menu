@@ -166,7 +166,9 @@ class _QuickMenuState extends State<QuickMenu>
   }
 
   void _onMenuClosed([_]) {
-    _open.value = false;
+    if (mounted) {
+      _open.value = false;
+    }
 
     widget.onMenuClosed?.call();
   }
