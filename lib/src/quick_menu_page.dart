@@ -33,8 +33,7 @@ class QuickMenuPage extends StatefulWidget {
   State<StatefulWidget> createState() => _QuickMenuPageState();
 }
 
-class _QuickMenuPageState extends State<QuickMenuPage>
-    with TickerProviderStateMixin {
+class _QuickMenuPageState extends State<QuickMenuPage> {
   final GlobalKey _menuKey = GlobalKey();
 
   late double _screenWidth;

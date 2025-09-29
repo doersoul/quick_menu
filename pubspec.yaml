@@ -1,7 +1,7 @@
 name: quick_menu
 description: "Press to display the quick menu, like 3D touch quick actions"
 repository: https://github.com/doersoul/quick_menu
-version: 8.0.0
+version: 9.0.0
 
 environment:
   sdk: ^3.9.2

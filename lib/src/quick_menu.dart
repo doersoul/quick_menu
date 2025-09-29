@@ -10,7 +10,7 @@ typedef MenuBuilder = Widget? Function(BuildContext context, Rect childRect);
 
 class QuickMenu extends StatefulWidget {
   final QuickMenuController? controller;
-  final bool useDelegatedTransition;
+  final bool enableDelegatedTransition;
   final Color delegatedBackgroundColor;
   final Color barrierColor;
   final double? overlayRadius;
@@ -30,7 +30,7 @@ class QuickMenu extends StatefulWidget {
   const QuickMenu({
     super.key,
     this.controller,
-    this.useDelegatedTransition = true,
+    this.enableDelegatedTransition = true,
     this.delegatedBackgroundColor = Colors.white,
     this.barrierColor = Colors.black,
     this.overlayRadius = 12,
@@ -66,7 +66,6 @@ class _QuickMenuState extends State<QuickMenu>
     super.initState();
 
     _controller = AnimationController(vsync: this, duration: Durations.short4);
-
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
     _initControllerListener();
@@ -78,7 +77,6 @@ class _QuickMenuState extends State<QuickMenu>
 
     if (widget.controller != oldWidget.controller) {
       _disposeControllerListener(oldWidget);
-
       _initControllerListener();
     }
   }
@@ -140,9 +138,8 @@ class _QuickMenuState extends State<QuickMenu>
     final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
 
     final QuickMenuPageRoute<bool> route = QuickMenuPageRoute<bool>(
-      useDelegatedTransition: widget.useDelegatedTransition,
-      overlayScaleIncrement: widget.overlayScaleIncrement,
-      backgroundColor: widget.delegatedBackgroundColor,
+      enableDelegatedTransition: widget.enableDelegatedTransition,
+      delegatedBackgroundColor: widget.delegatedBackgroundColor,
       pageBuilder: (_, Animation<double> animation, _) {
         return QuickMenuPage(
           controller: widget.controller,
@@ -162,7 +159,7 @@ class _QuickMenuState extends State<QuickMenu>
     _onOpenMenu();
 
     navigator.push(route).then((bool? result) {
-      Future.delayed(Durations.short4, () {
+      Future.delayed(Durations.short3, () {
         if (result != null && result) {
           widget.onTap?.call();
         }
@@ -178,7 +175,7 @@ class _QuickMenuState extends State<QuickMenu>
     widget.onOpenMenu?.call();
   }
 
-  void _onMenuClosed([_]) {
+  void _onMenuClosed() {
     if (mounted) {
       _open.value = false;
     }
