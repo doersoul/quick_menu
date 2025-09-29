@@ -187,7 +187,10 @@ class _QuickMenuState extends State<QuickMenu>
     widget.onTapDown?.call(details);
 
     _controller.forward().whenComplete(() {
-      widget.haptic?.call();
+      if (widget.haptic != null) {
+        SystemSound.play(SystemSoundType.click);
+        widget.haptic?.call();
+      }
 
       _controller.reverse();
     });
