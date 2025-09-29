@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quick_menu/src/quick_menu_controller.dart';
 import 'package:quick_menu/src/quick_menu_page.dart';
+import 'package:quick_menu/src/quick_menu_page_route.dart';
 
 typedef OverlayBuilder = Widget Function(BuildContext context, Widget child);
 
@@ -9,6 +10,8 @@ typedef MenuBuilder = Widget? Function(BuildContext context, Rect childRect);
 
 class QuickMenu extends StatefulWidget {
   final QuickMenuController? controller;
+  final bool useDelegatedTransition;
+  final Color delegatedBackgroundColor;
   final Color barrierColor;
   final double? overlayRadius;
   final bool overlayShadowEnable;
@@ -27,6 +30,8 @@ class QuickMenu extends StatefulWidget {
   const QuickMenu({
     super.key,
     this.controller,
+    this.useDelegatedTransition = true,
+    this.delegatedBackgroundColor = Colors.white,
     this.barrierColor = Colors.black,
     this.overlayRadius = 12,
     this.overlayShadowEnable = false,
@@ -132,23 +137,21 @@ class _QuickMenuState extends State<QuickMenu>
       overlay = widget.overlayBuilder!.call(context, widget.child);
     }
 
-    _onOpenMenu();
-
     final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
 
-    final PageRoute route = PageRouteBuilder(
-      opaque: false,
-      transitionDuration: Duration.zero,
-      reverseTransitionDuration: Duration.zero,
-      pageBuilder: (_, _, _) {
+    final QuickMenuPageRoute<bool> route = QuickMenuPageRoute<bool>(
+      useDelegatedTransition: widget.useDelegatedTransition,
+      overlayScaleIncrement: widget.overlayScaleIncrement,
+      backgroundColor: widget.delegatedBackgroundColor,
+      pageBuilder: (_, Animation<double> animation, _) {
         return QuickMenuPage(
           controller: widget.controller,
+          animation: animation,
           barrierColor: widget.barrierColor,
           childRadius: widget.overlayRadius,
           childShadowEnable: widget.overlayShadowEnable,
           childRect: rect,
           childScaleIncrement: widget.overlayScaleIncrement,
-          onTap: widget.onTap,
           onCloseMenu: widget.onCloseMenu,
           menu: menu,
           child: overlay,
@@ -156,7 +159,17 @@ class _QuickMenuState extends State<QuickMenu>
       },
     );
 
-    navigator.push(route).then(_onMenuClosed);
+    _onOpenMenu();
+
+    navigator.push(route).then((bool? result) {
+      Future.delayed(Durations.short4, () {
+        if (result != null && result) {
+          widget.onTap?.call();
+        }
+
+        _onMenuClosed();
+      });
+    });
   }
 
   void _onOpenMenu() {

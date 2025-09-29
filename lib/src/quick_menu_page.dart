@@ -5,12 +5,12 @@ import 'package:quick_menu/src/quick_menu_controller.dart';
 
 class QuickMenuPage extends StatefulWidget {
   final QuickMenuController? controller;
+  final Animation<double> animation;
   final Color barrierColor;
   final double? childRadius;
   final bool childShadowEnable;
   final Rect childRect;
   final double childScaleIncrement;
-  final VoidCallback? onTap;
   final VoidCallback? onCloseMenu;
   final Widget menu;
   final Widget child;
@@ -18,12 +18,12 @@ class QuickMenuPage extends StatefulWidget {
   const QuickMenuPage({
     super.key,
     this.controller,
+    required this.animation,
     required this.barrierColor,
     this.childRadius,
     required this.childShadowEnable,
     required this.childRect,
     required this.childScaleIncrement,
-    this.onTap,
     this.onCloseMenu,
     required this.menu,
     required this.child,
@@ -37,9 +37,6 @@ class _QuickMenuPageState extends State<QuickMenuPage>
     with TickerProviderStateMixin {
   final GlobalKey _menuKey = GlobalKey();
 
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
   late double _screenWidth;
   late double _screenHeight;
 
@@ -49,13 +46,7 @@ class _QuickMenuPageState extends State<QuickMenuPage>
   void initState() {
     super.initState();
 
-    _controller = AnimationController(vsync: this, duration: Durations.short4);
-
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-
     _initControllerListener();
-
-    _controller.forward();
   }
 
   @override
@@ -82,12 +73,12 @@ class _QuickMenuPageState extends State<QuickMenuPage>
 
   @override
   void dispose() {
-    _controller.dispose();
-
     _disposeControllerListener(widget);
 
     super.dispose();
   }
+
+  Animation<double> get _animation => widget.animation;
 
   void _initControllerListener() {
     widget.controller?.addListener(_controllerListener);
@@ -100,7 +91,7 @@ class _QuickMenuPageState extends State<QuickMenuPage>
   void _controllerListener() {
     final bool open = widget.controller!.isOpen;
     if (!open) {
-      _close();
+      _close(false);
     }
   }
 
@@ -119,26 +110,18 @@ class _QuickMenuPageState extends State<QuickMenuPage>
     return _menuSize;
   }
 
-  void _close([VoidCallback? callback]) {
+  void _close(bool result) {
     widget.onCloseMenu?.call();
 
-    final NavigatorState navigator = Navigator.of(context);
-
-    _controller.reverse().then((_) {
-      if (navigator.canPop()) {
-        navigator.pop();
-      }
-
-      callback?.call();
-    });
+    Navigator.pop(context, result);
   }
 
   void _onPop() {
-    _close();
+    _close(false);
   }
 
   void _onTap() {
-    _close(widget.onTap);
+    _close(true);
   }
 
   void _onPopInvokedWithResult(bool didPop, Object? result) {
@@ -146,7 +129,7 @@ class _QuickMenuPageState extends State<QuickMenuPage>
       return;
     }
 
-    _close();
+    _close(false);
   }
 
   @override
