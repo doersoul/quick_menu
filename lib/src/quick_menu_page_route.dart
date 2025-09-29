@@ -20,6 +20,7 @@ class QuickMenuPageRoute<T> extends PageRouteBuilder<T> {
     if (!enableDelegatedTransition) {
       return null;
     }
+
     return _delegatedTransition;
   }
 
