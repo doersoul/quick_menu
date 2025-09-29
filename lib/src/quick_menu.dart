@@ -130,9 +130,11 @@ class _QuickMenuState extends State<QuickMenu>
       return;
     }
 
-    Widget overlay = widget.child;
+    late final Widget overlay;
     if (widget.overlayBuilder != null) {
       overlay = widget.overlayBuilder!.call(context, widget.child);
+    } else {
+      overlay = widget.child;
     }
 
     final NavigatorState navigator = Navigator.of(context, rootNavigator: true);

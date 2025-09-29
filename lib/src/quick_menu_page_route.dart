@@ -34,6 +34,11 @@ class QuickMenuPageRoute<T> extends PageRouteBuilder<T> {
     return Stack(
       children: [
         Container(color: delegatedBackgroundColor),
+        QuickMenuScaleTransition(
+          animation: secondaryAnimation,
+          allowSnapshotting: allowSnapshotting,
+          child: child,
+        ),
         // AnimatedBuilder(
         //   animation: secondaryAnimation,
         //   builder: (_, _) {
@@ -43,11 +48,6 @@ class QuickMenuPageRoute<T> extends PageRouteBuilder<T> {
         //     );
         //   },
         // ),
-        QuickMenuScaleTransition(
-          animation: secondaryAnimation,
-          allowSnapshotting: allowSnapshotting,
-          child: child,
-        ),
       ],
     );
   }

@@ -65,7 +65,6 @@ class _QuickMenuPageState extends State<QuickMenuPage> {
 
     if (widget.controller != oldWidget.controller) {
       _disposeControllerListener(oldWidget);
-
       _initControllerListener();
     }
   }
@@ -234,7 +233,7 @@ class _QuickMenuPageState extends State<QuickMenuPage> {
       rect: widget.childRect,
       child: AnimatedBuilder(
         animation: _animation,
-        builder: (BuildContext ctx, Widget? cld) {
+        builder: (_, Widget? cld) {
           BorderRadiusGeometry? borderRadius;
           List<BoxShadow>? boxShadow;
 
