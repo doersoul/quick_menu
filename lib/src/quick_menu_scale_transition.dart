@@ -191,8 +191,8 @@ class _QuickMenuScalePainter extends SnapshotPainter {
     if (scale != 1.0) {
       final double dx = ((size.width * scale) - size.width) / 2;
       final double dy = ((size.height * scale) - size.height) / 2;
-      transform.translate(-dx, -dy);
-      transform.scale(scale, scale);
+      transform.translateByDouble(-dx, -dy, 0.0, 1.0);
+      transform.scaleByDouble(scale, scale, scale, 1.0);
     }
 
     context.pushTransform(true, offset, transform, painter);
