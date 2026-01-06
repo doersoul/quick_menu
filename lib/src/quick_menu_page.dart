@@ -259,10 +259,11 @@ class _QuickMenuPageState extends State<QuickMenuPage> {
             cld = ClipRRect(borderRadius: borderRadius, child: cld);
           }
 
-          // ScaleTransition
-          // scale: Tween(begin: 1.0, end: 1.0 + widget.childScaleIncrement).animate(widget.animation),
-          return Transform.scale(
-            scale: 1 + widget.childScaleIncrement * _animation.value,
+          return ScaleTransition(
+            scale: Tween(
+              begin: 1.0,
+              end: 1.0 + widget.childScaleIncrement,
+            ).animate(widget.animation),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: borderRadius,
