@@ -109,14 +109,13 @@ class _QuickMenuState extends State<QuickMenu>
 
   Rect? _getRect() {
     RenderBox? box = _key.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) {
+    if (box == null || !box.hasSize) {
       return null;
     }
 
-    final Size size = box.size;
     final Offset position = box.localToGlobal(Offset.zero);
 
-    return Rect.fromLTWH(position.dx, position.dy, size.width, size.height);
+    return position & box.size;
   }
 
   void _openMenu() {
@@ -214,8 +213,6 @@ class _QuickMenuState extends State<QuickMenu>
 
   @override
   Widget build(BuildContext context) {
-    final double increment = widget.overlayScaleIncrement.abs() / 2;
-
     return GestureDetector(
       key: _key,
       behavior: HitTestBehavior.translucent,
@@ -224,22 +221,20 @@ class _QuickMenuState extends State<QuickMenu>
       onTapMove: _onReverse,
       onTapCancel: _onTapCancel,
       onLongPressStart: _onLongPressStart,
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (_, Widget? cld) {
-          return Transform.scale(
-            scale: 1 - increment * _animation.value,
-            child: cld,
-          );
-        },
+      child: ScaleTransition(
+        scale: Tween<double>(
+          begin: 1.0,
+          end: 1.0 - (widget.overlayScaleIncrement.abs() / 2),
+        ).animate(_animation),
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: widget.onTap,
           child: ValueListenableBuilder<bool>(
             valueListenable: _open,
-            builder: (_, bool open, _) {
-              return Visibility.maintain(visible: !open, child: widget.child);
+            builder: (_, bool isOpen, Widget? cld) {
+              return Visibility.maintain(visible: !isOpen, child: cld!);
             },
+            child: widget.child,
           ),
         ),
       ),
