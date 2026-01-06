@@ -6,9 +6,9 @@ version: 11.0.4
 topics:
   - menu
   - quick menu
-  - long press menu
-  - quick menu
+  - long press show menu
   - 3D touch menu
+  - context menu
 
 environment:
   sdk: ^3.9.2
