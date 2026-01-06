@@ -23,25 +23,26 @@ class _QuickMenuScaleTransitionState extends State<QuickMenuScaleTransition> {
   static final Animatable<double> _scaleTween = Tween<double>(
     begin: 1.0,
     end: 0.96,
-  ).chain(CurveTween(curve: Curves.linear));
+  ).chain(CurveTween(curve: const Cubic(0.2, 0.0, 0.0, 1.0)));
 
   final SnapshotController _controller = SnapshotController();
 
-  late _QuickMenuScalePainter _painter;
   late Animation<double> _scaleAnimation;
+  late _QuickMenuScalePainter _painter;
 
   @override
   void initState() {
     super.initState();
 
-    _updateAnimationAndPainter();
+    _initAnimations();
 
-    widget.animation.addListener(_onAnimationValueChange);
-    widget.animation.addStatusListener(_onAnimationStatusChange);
+    _controller.allowSnapshotting = widget.allowSnapshotting;
   }
 
-  void _updateAnimationAndPainter() {
-    _scaleAnimation = _scaleTween.animate(widget.animation);
+  void _initAnimations() {
+    _scaleAnimation = _scaleTween.animate(
+      CurvedAnimation(parent: widget.animation, curve: Curves.linear),
+    );
 
     _painter = _QuickMenuScalePainter(scaleAnimation: _scaleAnimation);
   }
@@ -51,39 +52,19 @@ class _QuickMenuScaleTransitionState extends State<QuickMenuScaleTransition> {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.animation != widget.animation) {
-      oldWidget.animation.removeListener(_onAnimationValueChange);
-      oldWidget.animation.removeStatusListener(_onAnimationStatusChange);
-
       _painter.dispose();
 
-      _updateAnimationAndPainter();
-
-      widget.animation.addListener(_onAnimationValueChange);
-      widget.animation.addStatusListener(_onAnimationStatusChange);
+      _initAnimations();
     }
-  }
 
-  void _onAnimationValueChange() {
-    final bool shouldSnapshot =
-        widget.animation.isAnimating &&
-        widget.allowSnapshotting &&
-        _scaleAnimation.value != 1.0;
-
-    _controller.allowSnapshotting = shouldSnapshot;
-  }
-
-  void _onAnimationStatusChange(AnimationStatus status) {
-    _controller.allowSnapshotting =
-        status.isAnimating && widget.allowSnapshotting;
+    if (oldWidget.allowSnapshotting != widget.allowSnapshotting) {
+      _controller.allowSnapshotting = widget.allowSnapshotting;
+    }
   }
 
   @override
   void dispose() {
-    widget.animation.removeListener(_onAnimationValueChange);
-    widget.animation.removeStatusListener(_onAnimationStatusChange);
-
     _painter.dispose();
-
     _controller.dispose();
 
     super.dispose();
@@ -92,51 +73,12 @@ class _QuickMenuScaleTransitionState extends State<QuickMenuScaleTransition> {
   @override
   Widget build(BuildContext context) {
     return SnapshotWidget(
-      mode: SnapshotMode.permissive,
-      autoresize: true,
       controller: _controller,
       painter: _painter,
+      mode: SnapshotMode.permissive,
       child: widget.child,
     );
   }
-}
-
-void _drawImageScaledAndCentered(
-  PaintingContext context,
-  ui.Image image,
-  double scale,
-  double pixelRatio,
-  double opacity,
-) {
-  if (scale <= 0.0) {
-    return;
-  }
-
-  final Paint paint = Paint()
-    ..filterQuality = ui.FilterQuality.medium
-    ..color = Color.fromRGBO(0, 0, 0, opacity);
-
-  final double logicalWidth = image.width / pixelRatio;
-  final double logicalHeight = image.height / pixelRatio;
-  final double scaledLogicalWidth = logicalWidth * scale;
-  final double scaledLogicalHeight = logicalHeight * scale;
-
-  final double left = (logicalWidth - scaledLogicalWidth) / 2;
-  final double top = (logicalHeight - scaledLogicalHeight) / 2;
-
-  final Rect dst = Rect.fromLTWH(
-    left,
-    top,
-    scaledLogicalWidth,
-    scaledLogicalHeight,
-  );
-
-  context.canvas.drawImageRect(
-    image,
-    Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-    dst,
-    paint,
-  );
 }
 
 class _QuickMenuScalePainter extends SnapshotPainter {
@@ -144,61 +86,68 @@ class _QuickMenuScalePainter extends SnapshotPainter {
 
   _QuickMenuScalePainter({required this.scaleAnimation}) {
     scaleAnimation.addListener(notifyListeners);
-    scaleAnimation.addStatusListener(_onStatusChange);
   }
 
   @override
   void dispose() {
     scaleAnimation.removeListener(notifyListeners);
-    scaleAnimation.removeStatusListener(_onStatusChange);
-
     super.dispose();
-  }
-
-  @override
-  bool shouldRepaint(covariant _QuickMenuScalePainter oldPainter) {
-    return oldPainter.scaleAnimation.value != scaleAnimation.value;
   }
 
   @override
   void paintSnapshot(
     PaintingContext context,
-    ui.Offset offset,
-    ui.Size size,
+    Offset offset,
+    Size size,
     ui.Image image,
-    ui.Size sourceSize,
+    Size sourceSize,
     double pixelRatio,
   ) {
-    _drawImageScaledAndCentered(
-      context,
+    final double scale = scaleAnimation.value;
+    if (scale <= 0.0) return;
+
+    final Paint paint = Paint()..filterQuality = ui.FilterQuality.low;
+
+    final double sw = image.width / pixelRatio;
+    final double sh = image.height / pixelRatio;
+
+    final Rect destRect = Rect.fromCenter(
+      center: offset + Offset(sw / 2, sh / 2),
+      width: sw * scale,
+      height: sh * scale,
+    );
+
+    context.canvas.drawImageRect(
       image,
-      scaleAnimation.value,
-      pixelRatio,
-      1.0,
+      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+      destRect,
+      paint,
     );
   }
 
   @override
   void paint(
     PaintingContext context,
-    ui.Offset offset,
-    ui.Size size,
+    Offset offset,
+    Size size,
     PaintingContextCallback painter,
   ) {
     final double scale = scaleAnimation.value;
+    if (scale == 1.0) {
+      painter(context, offset);
+      return;
+    }
 
     final Matrix4 transform = Matrix4.identity();
-    if (scale != 1.0) {
-      final double dx = ((size.width * scale) - size.width) / 2;
-      final double dy = ((size.height * scale) - size.height) / 2;
-      transform.translateByDouble(-dx, -dy, 0.0, 1.0);
-      transform.scaleByDouble(scale, scale, scale, 1.0);
-    }
+    final double dx = ((size.width * scale) - size.width) / 2;
+    final double dy = ((size.height * scale) - size.height) / 2;
+
+    transform.translateByDouble(-dx, -dy, 0.0, 1.0);
+    transform.scaleByDouble(scale, scale, scale, 1.0);
 
     context.pushTransform(true, offset, transform, painter);
   }
 
-  void _onStatusChange(AnimationStatus _) {
-    notifyListeners();
-  }
+  @override
+  bool shouldRepaint(_QuickMenuScalePainter oldPainter) => true;
 }
