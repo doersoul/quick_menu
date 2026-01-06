@@ -65,6 +65,7 @@ class _QuickMenuScaleTransitionState extends State<QuickMenuScaleTransition> {
   @override
   void dispose() {
     _painter.dispose();
+
     _controller.dispose();
 
     super.dispose();
@@ -91,6 +92,7 @@ class _QuickMenuScalePainter extends SnapshotPainter {
   @override
   void dispose() {
     scaleAnimation.removeListener(notifyListeners);
+
     super.dispose();
   }
 
@@ -104,7 +106,9 @@ class _QuickMenuScalePainter extends SnapshotPainter {
     double pixelRatio,
   ) {
     final double scale = scaleAnimation.value;
-    if (scale <= 0.0) return;
+    if (scale <= 0.0) {
+      return;
+    }
 
     final Paint paint = Paint()..filterQuality = ui.FilterQuality.low;
 
@@ -135,6 +139,7 @@ class _QuickMenuScalePainter extends SnapshotPainter {
     final double scale = scaleAnimation.value;
     if (scale == 1.0) {
       painter(context, offset);
+
       return;
     }
 
