@@ -163,7 +163,8 @@ class _QuickMenuPageState extends State<QuickMenuPage> {
 
     final Widget menu = AnimatedBuilder(
       animation: _animation,
-      builder: (_, _) {
+      child: Container(key: _menuKey, child: widget.menu),
+      builder: (_, Widget? cld) {
         final double animateIncrement = -increment * _animation.value;
         final double animateSpace = space.abs() * _animation.value;
         final Size? menuSize = _getMenuSize();
@@ -217,12 +218,12 @@ class _QuickMenuPageState extends State<QuickMenuPage> {
           left: left,
           right: right,
           top: top,
-          child: Opacity(
-            opacity: _animation.value,
-            child: Transform.scale(
+          child: FadeTransition(
+            opacity: _animation,
+            child: ScaleTransition(
               alignment: alignment,
-              scale: _animation.value,
-              child: Container(key: _menuKey, child: widget.menu),
+              scale: _animation,
+              child: cld,
             ),
           ),
         );
@@ -258,6 +259,8 @@ class _QuickMenuPageState extends State<QuickMenuPage> {
             cld = ClipRRect(borderRadius: borderRadius, child: cld);
           }
 
+          // ScaleTransition
+          // scale: Tween(begin: 1.0, end: 1.0 + widget.childScaleIncrement).animate(widget.animation),
           return Transform.scale(
             scale: 1 + widget.childScaleIncrement * _animation.value,
             child: Container(
@@ -282,7 +285,7 @@ class _QuickMenuPageState extends State<QuickMenuPage> {
       onPopInvokedWithResult: _onPopInvokedWithResult,
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Stack(children: [barrier, menu, overlay]),
+        body: RepaintBoundary(child: Stack(children: [barrier, menu, overlay])),
       ),
     );
   }
