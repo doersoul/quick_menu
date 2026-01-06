@@ -3,6 +3,13 @@ description: "Press to display the quick menu, like 3D touch quick actions"
 repository: https://github.com/doersoul/quick_menu
 version: 11.0.4
 
+topics:
+  - menu
+  - quick menu
+  - long press menu
+  - quick menu
+  - 3D touch menu
+
 environment:
   sdk: ^3.9.2
   flutter: ">=1.17.0"
